@@ -8,8 +8,11 @@ MaskGenerator/
 │   ├── Vignetting.exe
 
 │   ├── _internal
+
 │   └── runs/unet
+
 │       └── unet_best.pt
+
 ├── /Vessels? eventually
 
 _internal is a folder of all the library requirements from the .venv
