@@ -14,6 +14,7 @@ MaskGenerator/
 ├── /Vessels? eventually
 
 _internal is a folder of all the library requirements from the .venv
+
 runs/unet/unet_best.pt is the training weights. Eventually I need to replace this with a better trained model
 
 To create a .exe file based on predict.py use the following command. Make sure you are in the right .venv first.
