@@ -9,9 +9,7 @@ MaskGenerator/
 
 │   ├── _internal
 
-│   └── runs/unet
-
-│       └── unet_best.pt
+│   └── runs/unet/unet_best.pt
 
 ├── /Vessels? eventually
 
