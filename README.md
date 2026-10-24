@@ -1,8 +1,12 @@
 Structure of the code should be as follows:
 MaskGenerator/
+
 ├── Dashboard.py
+
 ├── /Vignetting
+
 │   ├── Vignetting.exe
+
 │   ├── _internal
 │   └── runs/unet
 │       └── unet_best.pt
