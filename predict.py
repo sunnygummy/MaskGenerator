@@ -1,5 +1,3 @@
-# predict.py
-
 import torch
 import numpy as np
 from PIL import Image
@@ -8,32 +6,24 @@ import argparse
 import sys
 from models.unet import UNet
 
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
 # Path to the checkpoint produced by training
 # ============================================================
 # APPLICATION PATH
 # ============================================================
-
 if getattr(sys, "frozen", False):
-    # Running as a PyInstaller executable
+    # Directory containing Predict.exe
     BASE_DIR = Path(sys.executable).resolve().parent
 else:
-    # Running as normal Python script
+    # Directory containing predict.py
     BASE_DIR = Path(__file__).resolve().parent
 
-
+# External model checkpoint
 CKPT_PATH = (
     BASE_DIR
     / "runs"
     / "unet"
     / "unet_best.pt"
 )
-
-
 # Prediction threshold
 THR = 0.5
 
@@ -55,16 +45,11 @@ IMAGE_EXTENSIONS = {
 def load_model():
 
     if not CKPT_PATH.exists():
-        raise FileNotFoundError(
-            f"Model checkpoint not found: {CKPT_PATH}"
-        )
+        raise FileNotFoundError()
 
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )
-
-    print(f"Using device: {device}")
-    print(f"Loading model: {CKPT_PATH}")
 
     checkpoint = torch.load(
         CKPT_PATH,
@@ -116,9 +101,7 @@ def generate_mask(
     output_path = Path(output_path)
 
     if not image_path.exists():
-        raise FileNotFoundError(
-            f"Image not found: {image_path}"
-        )
+        raise FileNotFoundError()
 
     # --------------------------------------------------------
     # Load image using Pillow
@@ -207,10 +190,6 @@ def generate_mask(
         format="TIFF"
     )
 
-    print(
-        f"Saved: {output_path}"
-    )
-
 
 # ============================================================
 # FIND IMAGES
@@ -230,10 +209,7 @@ def find_images(input_path):
             input_path.suffix.lower()
             not in IMAGE_EXTENSIONS
         ):
-            raise ValueError(
-                f"Unsupported image type: "
-                f"{input_path.suffix}"
-            )
+            raise ValueError()
 
         return [input_path]
 
@@ -257,10 +233,7 @@ def find_images(input_path):
 
         if not images:
 
-            raise RuntimeError(
-                f"No supported images found in: "
-                f"{input_path}"
-            )
+            raise RuntimeError()
 
         return images
 
@@ -268,9 +241,7 @@ def find_images(input_path):
     # Doesn't exist
     # --------------------------------------------------------
 
-    raise FileNotFoundError(
-        f"Input path does not exist: {input_path}"
-    )
+    raise FileNotFoundError()
 
 
 # ============================================================
@@ -281,7 +252,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Generate segmentation masks using "
+            "Generate vignetting masks using "
             "a trained U-Net."
         )
     )
@@ -333,15 +304,6 @@ def main():
         input_path
     )
 
-    print()
-    print(
-        f"Found {len(image_paths)} image(s)."
-    )
-
-    print(
-        f"Destination: {output_dir}"
-    )
-
     # --------------------------------------------------------
     # Load model ONCE
     # --------------------------------------------------------
@@ -355,17 +317,6 @@ def main():
     # --------------------------------------------------------
 
     for image_path in image_paths:
-
-        # Example:
-        #
-        # Input:
-        #     photo.jpg
-        #
-        # Destination:
-        #     C:\Masks
-        #
-        # Output:
-        #     C:\Masks\photo_mvig.tif
 
         output_path = (
             output_dir
@@ -383,24 +334,6 @@ def main():
             image_path=image_path,
             output_path=output_path
         )
-
-    # --------------------------------------------------------
-    # Finished
-    # --------------------------------------------------------
-
-    print()
-    print(
-        "Finished! Masks saved to:"
-    )
-
-    print(
-        output_dir
-    )
-
-
-# ============================================================
-# ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
     main()
