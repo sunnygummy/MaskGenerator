@@ -1,31 +1,35 @@
+
 import torch
 import numpy as np
 from PIL import Image
 from pathlib import Path
 import argparse
 import sys
+import json
+
 from models.unet import UNet
+
 
 # Path to the checkpoint produced by training
 # ============================================================
 # APPLICATION PATH
 # ============================================================
+
 if getattr(sys, "frozen", False):
-    # Directory containing Predict.exe
     BASE_DIR = Path(sys.executable).resolve().parent
 else:
-    # Directory containing predict.py
     BASE_DIR = Path(__file__).resolve().parent
 
-# External model checkpoint
+
 CKPT_PATH = (
     BASE_DIR
     / "runs"
     / "unet"
     / "unet_best.pt"
 )
-# Prediction threshold
+
 THR = 0.5
+
 
 # Supported image types
 IMAGE_EXTENSIONS = {
@@ -36,6 +40,21 @@ IMAGE_EXTENSIONS = {
     ".tiff",
     ".bmp",
 }
+
+
+# ============================================================
+# SEND PROGRESS TO DASHBOARD
+# ============================================================
+
+def send_progress(current, total):
+
+    print(
+        json.dumps({
+            "current": current,
+            "total": total
+        }),
+        flush=True
+    )
 
 
 # ============================================================
@@ -56,13 +75,11 @@ def load_model():
         map_location=device
     )
 
-    # Use the same image size used during training
     img_size = checkpoint.get(
         "img_size",
         256
     )
 
-    # Use the same base channel count used during training
     base_channels = checkpoint.get(
         "base",
         64
@@ -232,7 +249,6 @@ def find_images(input_path):
         )
 
         if not images:
-
             raise RuntimeError()
 
         return images
@@ -316,7 +332,7 @@ def main():
     # Generate masks
     # --------------------------------------------------------
 
-    for image_path in image_paths:
+    for index, image_path in enumerate(image_paths, start=1):
 
         output_path = (
             output_dir
@@ -335,5 +351,36 @@ def main():
             output_path=output_path
         )
 
+        # Update dashboard after saving each mask
+
+        send_progress(
+            index,
+            len(image_paths)
+        )
+
+    # --------------------------------------------------------
+    # FINISHED
+    # --------------------------------------------------------
+
+    print(
+        json.dumps({
+            "finished": True
+        }),
+        flush=True
+    )
+
+
 if __name__ == "__main__":
-    main()
+
+    try:
+        main()
+
+    except Exception as e:
+
+        print(
+            f"ERROR: {e}",
+            file=sys.stderr,
+            flush=True
+        )
+
+        sys.exit(1)
